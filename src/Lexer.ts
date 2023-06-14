@@ -312,7 +312,7 @@ class StreamLexer {
     }
     if (numberLooking.includes(literalString[0])) {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const [_, ok] = this.parseJSON(literalString);
+      const [, ok] = this.parseJSON(literalString);
       return ok;
     }
     return false;

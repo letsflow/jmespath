@@ -110,6 +110,7 @@ class TokenParser {
     switch (token.type) {
       case Token.TOK_VARIABLE:
         return { type: 'Variable', name: token.value as string };
+      case Token.TOK_NUMBER:
       case Token.TOK_LITERAL:
         return { type: 'Literal', value: token.value };
       case Token.TOK_UNQUOTEDIDENTIFIER: {

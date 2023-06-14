@@ -110,6 +110,13 @@ class TokenParser {
     switch (token.type) {
       case Token.TOK_VARIABLE:
         return { type: 'Variable', name: token.value as string };
+      case Token.TOK_NUMBER: {
+        if (this.lookahead(0) === Token.TOK_RBRACKET || this.lookahead(0) === Token.TOK_COMMA) {
+          throw new Error('Syntax error: numeric literal is not allowed as identifier.');
+        } else {
+          return { type: 'Literal', value: token.value };
+        }
+      }
       case Token.TOK_LITERAL:
         return { type: 'Literal', value: token.value };
       case Token.TOK_UNQUOTEDIDENTIFIER: {
@@ -190,7 +197,7 @@ class TokenParser {
       }
       case Token.TOK_LPAREN: {
         const args: ExpressionNode[] = [];
-        let expression = this.expression(0);
+        const expression = this.expression(0);
         args.push(expression);
         this.match(Token.TOK_RPAREN);
         return args[0];

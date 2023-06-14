@@ -216,3 +216,47 @@ describe('root', () => {
     expect(value).toEqual([1, 99]);
   });
 });
+
+describe('arithmetic', () => {
+  it('should add', () => {
+    const value = search({ foo: 60, bar: 10 }, 'foo + bar');
+    expect(value).toEqual(70);
+  });
+
+  it('should subtract', () => {
+    const value = search({ foo: 60, bar: 10 }, 'foo - bar');
+    expect(value).toEqual(50);
+  });
+
+  it('should multiply', () => {
+    const value = search({ foo: 60, bar: 10 }, 'foo * bar');
+    expect(value).toEqual(600);
+  });
+
+  it('should divide', () => {
+    const value = search({ foo: 60, bar: 10 }, 'foo / bar');
+    expect(value).toEqual(6);
+  });
+
+  it('should mod', () => {
+    const value = search({ foo: 62, bar: 10 }, 'foo % bar');
+    expect(value).toEqual(2);
+  });
+
+  it('should div', () => {
+    const value = search({ foo: 62, bar: 10 }, 'foo // bar');
+    expect(value).toEqual(6);
+  });
+});
+
+describe('number literals', () => {
+  it('should compare number literals', () => {
+    const value = search({ foo: 60, bar: 10 }, 'foo > 50');
+    expect(value).toEqual(true);
+  });
+
+  it('should add number literals', () => {
+    const value = search({}, '10 + 60');
+    expect(value).toEqual(70);
+  });
+});

@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { search, registerFunction, TYPE_NUMBER } from '../src';
 import { expectError } from './error.utils';
-import { sha256, sha512 } from 'hash.js';
+import { sha256 } from '@noble/hashes/sha256';
+import { sha512 } from '@noble/hashes/sha512';
+import { bytesToHex } from '@noble/hashes/utils';
 
 describe('Evaluates functions', () => {
   it('from_items()', () => {
@@ -162,11 +164,11 @@ describe('Added functions', () => {
   });
 
   it('sha256', () => {
-    expect(search('hello world', 'sha256(@)')).toEqual(sha256().update('hello world').digest('hex'));
+    expect(search('hello world', 'sha256(@)')).toEqual(bytesToHex(sha256('hello world')));
   });
 
   it('sha512', () => {
-    expect(search('hello world', 'sha512(@)')).toEqual(sha512().update('hello world').digest('hex'));
+    expect(search('hello world', 'sha512(@)')).toEqual(bytesToHex(sha512('hello world')));
   });
 
   it('uuid', () => {

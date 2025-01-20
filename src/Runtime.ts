@@ -25,9 +25,11 @@ import type {
 } from './JSON.type';
 import type { TreeInterpreter } from './TreeInterpreter';
 
-import stringify from 'fast-json-stable-stringify';
-import hash from 'hash.js';
+import { sha256 } from '@noble/hashes/sha256';
+import { sha512 } from '@noble/hashes/sha512';
+import { bytesToHex } from '@noble/hashes/utils';
 import { NIL, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import jsonStringify from './utils/json-serialize';
 
 export enum InputArgument {
   TYPE_NUMBER = 0,
@@ -631,8 +633,17 @@ export class Runtime {
     return condition ? thenValue : elseValue ?? null;
   };
 
-  private functionRange: RuntimeFunction<[number, number, string], Array<number | string>> = ([start, end, prefix]) => {
-    return Array.from({ length: end - start }, (_, i) => (prefix ? `${prefix}${i + start}` : i + start));
+  private functionRange: RuntimeFunction<[number, number?, string?], Array<number | string>> = ([
+    start,
+    end,
+    prefix,
+  ]) => {
+    if (end === undefined) {
+      end = start;
+      start = 0;
+    }
+
+    return Array.from({ length: end - start }, (_, i) => (prefix !== undefined ? `${prefix}${i + start}` : i + start));
   };
 
   private functionToObject: RuntimeFunction<[JSONArrayKeyValuePairs], JSONObject> = ([array]) => {
@@ -640,7 +651,11 @@ export class Runtime {
   };
 
   private functionJsonSerialize: RuntimeFunction<[JSONValue], string> = ([inputValue]) => {
-    return stringify(inputValue);
+    const result = jsonStringify(inputValue);
+    if (result === undefined) {
+      throw new Error('invalid-value');
+    }
+    return result;
   };
 
   private functionJsonParse: RuntimeFunction<[string], JSONValue> = ([inputValue]) => {
@@ -648,11 +663,11 @@ export class Runtime {
   };
 
   private functionSha256: RuntimeFunction<[string], string> = ([inputValue]) => {
-    return hash.sha256().update(inputValue).digest('hex');
+    return bytesToHex(sha256(inputValue));
   };
 
   private functionSha512: RuntimeFunction<[string], string> = ([inputValue]) => {
-    return hash.sha512().update(inputValue).digest('hex');
+    return bytesToHex(sha512(inputValue));
   };
 
   private functionUuid: RuntimeFunction<[string?, string?], string> = ([name, ns]) => {
@@ -663,7 +678,7 @@ export class Runtime {
     // Match the pattern between slashes and any flags after the last slash
     const match = regexString.match(/^\/(.*?)\/([gimsuy]*)$/);
     if (!match) {
-      throw new Error('Invalid regex string format');
+      throw new Error('invalid-regex');
     }
     return new RegExp(match[1], match[2]);
   }
@@ -1124,6 +1139,7 @@ export class Runtime {
         },
         {
           types: [InputArgument.TYPE_NUMBER],
+          optional: true,
         },
         {
           types: [InputArgument.TYPE_STRING],

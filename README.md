@@ -218,6 +218,7 @@ Generates an array of numbers or prefixed strings from `start` to `end - 1`. If 
 
 **Example**:
 ```jmespath
+range(5)                // [0, 1, 2, 3, 4]
 range(1, 5)             // [1, 2, 3, 4]
 range(1, 5, 'item_')    // ["item_1", "item_2", "item_3", "item_4"]
 ```
@@ -246,7 +247,7 @@ to_object([['key1', 'value1'], ['key2', 'value2']])
 json_serialize(value)
 ```
 
-_Uses a [deterministic version of JSON.stringify](https://www.npmjs.com/package/fast-json-stable-stringify) to serialize the value._
+_Uses a deterministic version of JSON.stringify to serialize the value._
 
 **Description**:  
 Serializes a JSON value to a string.

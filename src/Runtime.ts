@@ -25,6 +25,10 @@ import type {
 } from './JSON.type';
 import type { TreeInterpreter } from './TreeInterpreter';
 
+import stringify from 'fast-json-stable-stringify';
+import hash from 'hash.js';
+import { NIL, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+
 export enum InputArgument {
   TYPE_NUMBER = 0,
   TYPE_ANY = 1,
@@ -467,7 +471,7 @@ export class Runtime {
     return padRight(subject, width, padding);
   };
 
-  private functionReplace: RuntimeFunction<JSONValue[], string> = resolvedArgs => {
+  private functionRegexplace: RuntimeFunction<JSONValue[], string> = resolvedArgs => {
     const subject = <string>resolvedArgs[0];
     const string = <string>resolvedArgs[1];
     const by = <string>resolvedArgs[2];
@@ -480,7 +484,7 @@ export class Runtime {
     return split(subject, search, resolvedArgs.length > 2 ? <number>resolvedArgs[2] : undefined);
   };
 
-  private functionReverse: RuntimeFunction<[string | JSONArray], string | JSONArray> = ([inputValue]) => {
+  private functionRegexverse: RuntimeFunction<[string | JSONArray], string | JSONArray> = ([inputValue]) => {
     const typeName = this.getTypeName(inputValue);
     if (typeName === InputArgument.TYPE_STRING) {
       return new Text(inputValue as string).reverse();
@@ -617,6 +621,67 @@ export class Runtime {
       .fill(null)
       .map((_, index) => array.map(arr => arr[index]));
     return result;
+  };
+
+  private functionIf: RuntimeFunction<[JSONValue, JSONValue, JSONValue], JSONValue> = ([
+    condition,
+    thenValue,
+    elseValue,
+  ]) => {
+    return condition ? thenValue : elseValue ?? null;
+  };
+
+  private functionRange: RuntimeFunction<[number, number, string], Array<number | string>> = ([start, end, prefix]) => {
+    return Array.from({ length: end - start }, (_, i) => (prefix ? `${prefix}${i + start}` : i + start));
+  };
+
+  private functionToObject: RuntimeFunction<[JSONArrayKeyValuePairs], JSONObject> = ([array]) => {
+    return Object.fromEntries(array);
+  };
+
+  private functionJsonSerialize: RuntimeFunction<[JSONValue], string> = ([inputValue]) => {
+    return stringify(inputValue);
+  };
+
+  private functionJsonParse: RuntimeFunction<[string], JSONValue> = ([inputValue]) => {
+    return JSON.parse(inputValue);
+  };
+
+  private functionSha256: RuntimeFunction<[string], string> = ([inputValue]) => {
+    return hash.sha256().update(inputValue).digest('hex');
+  };
+
+  private functionSha512: RuntimeFunction<[string], string> = ([inputValue]) => {
+    return hash.sha512().update(inputValue).digest('hex');
+  };
+
+  private functionUuid: RuntimeFunction<[string?, string?], string> = ([name, ns]) => {
+    return name !== undefined ? uuidv5(name, ns ?? NIL) : uuidv4();
+  };
+
+  private parseRegexString(regexString: string): RegExp {
+    // Match the pattern between slashes and any flags after the last slash
+    const match = regexString.match(/^\/(.*?)\/([gimsuy]*)$/);
+    if (!match) {
+      throw new Error('Invalid regex string format');
+    }
+    return new RegExp(match[1], match[2]);
+  }
+
+  private functionRegexTest: RuntimeFunction<[string, string], boolean> = ([regexp, val]) => {
+    return this.parseRegexString(regexp).test(val);
+  };
+
+  private functionRegexMatch: RuntimeFunction<[string, string], string[]> = ([regexp, val]) => {
+    return Array.from(val.match(this.parseRegexString(regexp)) || []);
+  };
+
+  private functionRegexMatchAll: RuntimeFunction<[string, string], string[][]> = ([regexp, val]) => {
+    return Array.from(val.matchAll(this.parseRegexString(regexp))).map(match => Array.from(match));
+  };
+
+  private functionRegexReplace: RuntimeFunction<[string, string, string], string> = ([regexp, repl, val]) => {
+    return val.replace(this.parseRegexString(regexp), repl);
   };
 
   private functionTable: FunctionTable = {
@@ -865,7 +930,7 @@ export class Runtime {
       ],
     },
     replace: {
-      _func: this.functionReplace,
+      _func: this.functionRegexplace,
       _signature: [
         {
           types: [InputArgument.TYPE_STRING],
@@ -898,7 +963,7 @@ export class Runtime {
       ],
     },
     reverse: {
-      _func: this.functionReverse,
+      _func: this.functionRegexverse,
       _signature: [
         {
           types: [InputArgument.TYPE_STRING, InputArgument.TYPE_ARRAY],
@@ -1033,6 +1098,136 @@ export class Runtime {
         {
           types: [InputArgument.TYPE_ARRAY],
           variadic: true,
+        },
+      ],
+    },
+    if: {
+      _func: this.functionIf,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_BOOLEAN],
+        },
+        {
+          types: [InputArgument.TYPE_ANY],
+        },
+        {
+          types: [InputArgument.TYPE_ANY],
+          optional: true,
+        },
+      ],
+    },
+    range: {
+      _func: this.functionRange,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_NUMBER],
+        },
+        {
+          types: [InputArgument.TYPE_NUMBER],
+        },
+        {
+          types: [InputArgument.TYPE_STRING],
+          optional: true,
+        },
+      ],
+    },
+    to_object: {
+      _func: this.functionToObject,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_ARRAY],
+        },
+      ],
+    },
+    json_serialize: {
+      _func: this.functionJsonSerialize,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_ANY],
+        },
+      ],
+    },
+    json_parse: {
+      _func: this.functionJsonParse,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+      ],
+    },
+    sha256: {
+      _func: this.functionSha256,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+      ],
+    },
+    sha512: {
+      _func: this.functionSha512,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+      ],
+    },
+    uuid: {
+      _func: this.functionUuid,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_STRING],
+          optional: true,
+        },
+        {
+          types: [InputArgument.TYPE_STRING],
+          optional: true,
+        },
+      ],
+    },
+    regex_test: {
+      _func: this.functionRegexTest,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+      ],
+    },
+    regex_match: {
+      _func: this.functionRegexMatch,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+      ],
+    },
+    regex_match_all: {
+      _func: this.functionRegexMatchAll,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+      ],
+    },
+    regex_replace: {
+      _func: this.functionRegexReplace,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+        {
+          types: [InputArgument.TYPE_STRING],
         },
       ],
     },

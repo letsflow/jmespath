@@ -14,6 +14,21 @@ This fork extends the original specs, adding the following functionality;
 * [Root value access](#root-value-access)
 * [Number literals](#number-literals)
 
+Additionally, it adds the following functions:
+
+* [if](#if) - Conditional expression
+* [range](#range) - Generate a range of numbers or prefixed strings
+* [to_object](#to_object) - Convert an array of key-value pairs into an object
+* [json_serialize](#json_serialize) - Serialize a JSON value to a string
+* [json_parse](#json_parse) - Parse a JSON string into a JSON object
+* [sha256](#sha256) - Calculate the SHA-256 hash of a string
+* [sha512](#sha512) - Calculate the SHA-512 hash of a string
+* [uuid](#uuid) - Generate a UUID
+* [regex_test](#regex_test) - Test if a string matches a regular expression
+* [regex_match](#regex_match) - Return the first match of a regular expression in a string
+* [regex_match_all](#regex_match_all) - Return all matches of a regular expression in a string
+* [regex_replace](#regex_replace) - Replace parts of a string matching a regular expression with a replacement string
+
 ## INSTALLATION
 
 ```
@@ -164,7 +179,7 @@ Numbers in the root scope are treated as number literals. This means that you do
 need to quote numbers with backticks.
 
 ```javascript
-search([{"bar": 1}, {"bar": 10}]}, '[?bar==10]')
+search([{"bar": 1}, {"bar": 10}], '[?bar==10]')
 
 // OUTPUTS;
 // [{"bar": 10}]
@@ -174,9 +189,200 @@ You can also use numbers in arithmetic operations
 
 ```
 search({}, '16 + 26'); // 42
+```
 
-// With the original specs we'd need to do
-search({}, '`16` + `26`');
+## Additional Functions
+
+### `if`
+**Syntax**:
+```jmespath
+if(condition, thenValue, elseValue?)
+```
+
+**Description**:  
+Returns `thenValue` if `condition` is true, otherwise returns `elseValue`. If `elseValue` is not provided, it defaults to `null`.
+
+**Example**:
+```jmespath
+if(@ > 10, "large", "small")
+```
+
+### `range`
+**Syntax**:
+```jmespath
+range(start, end, prefix?)
+```
+
+**Description**:  
+Generates an array of numbers or prefixed strings from `start` to `end - 1`. If `prefix` is provided, each number is prefixed.
+
+**Example**:
+```jmespath
+range(1, 5)             // [1, 2, 3, 4]
+range(1, 5, 'item_')    // ["item_1", "item_2", "item_3", "item_4"]
+```
+
+### `to_object`
+**Syntax**:
+```jmespath
+to_object(entries)
+```
+
+**Description**:  
+Converts an array of key-value pairs into an object.
+
+**Example**:
+```jmespath
+to_object([['key1', 'value1'], ['key2', 'value2']])
+// { "key1": "value1", "key2": "value2" }
+
+[ 'value1', 'value2'] | to_object(zip(range(1, length(@) + 1, 'key'), @))
+// { "key1": "value1", "key2": "value2" }
+```
+
+### `json_serialize`
+**Syntax**:
+```jmespath
+json_serialize(value)
+```
+
+_Uses a [deterministic version of JSON.stringify](https://www.npmjs.com/package/fast-json-stable-stringify) to serialize the value._
+
+**Description**:  
+Serializes a JSON value to a string.
+
+**Example**:
+```jmespath
+json_serialize({ key: 'value' })
+// "{\"key\":\"value\"}"
+```
+
+### `json_parse`
+**Syntax**:
+```jmespath
+json_parse(string)
+```
+
+**Description**:  
+Parses a JSON string into a JSON object.
+
+**Example**:
+```jmespath
+json_parse("{\"key\":\"value\"}")
+// { "key": "value" }
+```
+
+### `sha256`
+**Syntax**:
+```jmespath
+sha256(string)
+```
+
+**Description**:  
+Calculates the SHA-256 hash of a string and returns it as a hexadecimal string.
+
+**Example**:
+```jmespath
+sha256('hello')
+// "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+```
+
+### `sha512`
+**Syntax**:
+```jmespath
+sha512(string)
+```
+
+**Description**:  
+Calculates the SHA-512 hash of a string and returns it as a hexadecimal string.
+
+**Example**:
+```jmespath
+sha512('hello')
+// "9b71d224bd62f3785d96d46ad3ea3d73319b0c44e59b202205c5d235a0a6caa5a3b36f8c0ab9d45df9215bf07d4d1552c0b1f8bd2671c8a7a3d126f457d79d72"
+```
+
+### `uuid`
+**Syntax**:
+```jmespath
+uuid(name?, namespace?)
+```
+
+**Description**:  
+Generates a UUID. If `name` and (optionally) `namespace` are provided, generates a version 5 UUID; otherwise, generates a version 4 UUID.
+
+**Example**:
+```jmespath
+uuid() // Random v4 UUID
+uuid('example') // v5 UUID
+uuid('example', '6ba7b810-9dad-11d1-80b4-00c04fd430c8') // v5 UUID with namespace
+```
+
+`name` must be a string. Use `json_serialize()` to convert a JSON object to a string.
+
+### `regex_test`
+**Syntax**:
+```jmespath
+regex_test(regex, string)
+```
+
+**Description**:  
+Tests if a string matches a given regular expression.
+
+**Example**:
+```jmespath
+regex_test('/^hello/', 'hello world') // true
+
+regex_test('/^hello/', 'HELLO world') // false
+regex_test('/^hello/i', 'HELLO world') // true
+```
+
+### `regex_match`
+**Syntax**:
+```jmespath
+regex_match(regex, string)
+```
+
+**Description**:  
+Returns the first match of a regular expression in a string as an array.
+
+**Example**:
+```jmespath
+regex_match('/hello (\\w+)/', 'hello world')
+// ["hello world", "world"]
+
+regex_match('/\\w+/g', 'hello world')
+// ["hello", "world"]
+```
+
+### `regex_match_all`
+**Syntax**:
+```jmespath
+regex_match_all(regex, string)
+```
+
+**Description**:  
+Returns all matches of a regular expression in a string as an array of arrays.
+
+**Example**:
+```jmespath
+regex_match_all('/(\\w+)=(\d+)/g', 'foo=24 bar=99')
+// [["foo=24", "foo", "24"], ["bar=99", "bar", "99"]]
+```
+
+### `regex_replace`
+**Syntax**:
+```jmespath
+regex_replace(regex, replacement, string)
+```
+
+**Description**:  
+Replaces parts of a string matching a regular expression with a replacement string.
+
+**Example**:
+```jmespath
+regex_replace('/world/', 'universe', 'hello world')
+// "hello universe"
 ```
 
 ## More Resources

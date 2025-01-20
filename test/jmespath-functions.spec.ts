@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { search, registerFunction, TYPE_NUMBER } from '../src';
 import { expectError } from './error.utils';
+import { sha256, sha512 } from 'hash.js';
 
 describe('Evaluates functions', () => {
   it('from_items()', () => {
@@ -124,6 +125,83 @@ describe('Type-checks function arguments', () => {
     expectError(() => {
       return search('subject string', "pad_right(@, `1`, '--')");
     }, 'invalid-value');
+  });
+});
+
+describe('Added functions', () => {
+  it('if()', () => {
+    expect(search({ cond: true }, "if(@.cond, 'yes', 'no')")).toEqual('yes');
+    expect(search({ cond: false }, "if(@.cond, 'yes', 'no')")).toEqual('no');
+    expect(search({ cond: true }, "if(@.cond, 'ok')")).toEqual('ok');
+    expect(search({ cond: false }, "if(@.cond, 'ok')")).toEqual(null);
+  });
+
+  it('range()', () => {
+    expect(search({}, 'range(5)')).toEqual([0, 1, 2, 3, 4]);
+    expect(search({}, 'range(1, 5)')).toEqual([1, 2, 3, 4]);
+    expect(search({}, "range(1, 5, 'item_')")).toEqual(['item_1', 'item_2', 'item_3', 'item_4']);
+  });
+
+  it('to_object()', () => {
+    expect(search({}, "to_object([['key1', 'value1'], ['key2', 'value2']])")).toEqual({
+      key1: 'value1',
+      key2: 'value2',
+    });
+    expect(search(['value1', 'value2'], "to_object(zip(range(1, length(@) + 1, 'key'), @))")).toEqual({
+      key1: 'value1',
+      key2: 'value2',
+    });
+  });
+
+  it('json_serialize()', () => {
+    expect(search({ foo: 'bar' }, 'json_serialize(@)')).toEqual('{"foo":"bar"}');
+  });
+
+  it('json_parse()', () => {
+    expect(search('{"foo":"bar"}', 'json_parse(@)')).toEqual({ foo: 'bar' });
+  });
+
+  it('sha256', () => {
+    expect(search('hello world', 'sha256(@)')).toEqual(sha256().update('hello world').digest('hex'));
+  });
+
+  it('sha512', () => {
+    expect(search('hello world', 'sha512(@)')).toEqual(sha512().update('hello world').digest('hex'));
+  });
+
+  it('uuid', () => {
+    expect(search({}, 'uuid()')).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    expect(search({}, "uuid('example')")).toEqual('feb54431-301b-52bb-a6dd-e1e93e81bb9e');
+    expect(search({}, "uuid('example', '6ba7b810-9dad-11d1-80b4-00c04fd430c8')")).toEqual(
+      '7cb48787-6d91-5b9f-bc60-f30298ea5736',
+    );
+  });
+
+  it('regex_test', () => {
+    expect(search('hello world', "regex_test('/^hello/', @)")).toEqual(true);
+    expect(search('HELLO world', "regex_test('/^hello/', @)")).toEqual(false);
+    expect(search('HELLO world', "regex_test('/^hello/i', @)")).toEqual(true);
+  });
+
+  it('regex_match', () => {
+    expect(search('hello world', "regex_match('/^hello (\\w+)/', @)")).toEqual(['hello world', 'world']);
+    expect(search('hello world', "regex_match('/\\w+/g', @)")).toEqual(['hello', 'world']);
+  });
+
+  it('regex_match_all', () => {
+    const a = search('foo=24 bar=99', "regex_match_all('/(\\w+)=(\\d+)/g', @)");
+    expect(a).toEqual([
+      ['foo=24', 'foo', '24'],
+      ['bar=99', 'bar', '99'],
+    ]);
+    expect(
+      search('foo=24 bar=99', "regex_match_all('/(\\w+)=(\\d+)/g', @) | map(&[[1],[2]], @) | to_object(@)"),
+    ).toEqual({ foo: '24', bar: '99' });
+  });
+
+  it('regex_replace', () => {
+    expect(search('hello world', "regex_replace('/w\\w+d/', 'planet', @)")).toEqual('hello planet');
+    expect(search('hello world', "regex_replace('/[aeoiu]/g', '*', @)")).toEqual('h*ll* w*rld');
   });
 });
 

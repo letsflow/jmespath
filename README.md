@@ -23,7 +23,7 @@ Additionally, it adds the following functions:
 * [json_parse](#json_parse) - Parse a JSON string into a JSON object
 * [sha256](#sha256) - Calculate the SHA-256 hash of a string
 * [sha512](#sha512) - Calculate the SHA-512 hash of a string
-* [uuid](#uuid) - Generate a UUID
+* [uuid](#uuid) - Generate a UUID v5
 * [regex_test](#regex_test) - Test if a string matches a regular expression
 * [regex_match](#regex_match) - Return the first match of a regular expression in a string
 * [regex_match_all](#regex_match_all) - Return all matches of a regular expression in a string
@@ -310,16 +310,26 @@ uuid(name?, namespace?)
 ```
 
 **Description**:  
-Generates a UUID. If `name` and (optionally) `namespace` are provided, generates a version 5 UUID; otherwise, generates a version 4 UUID.
+Generates a version 5 UUID.
+
+UUID v5 is consistent. It creates a UUID based on the SHA hash of the input. This means that any given combination
+of input and namespace will result in the same UUID, every time.
 
 **Example**:
 ```jmespath
-uuid() // Random v4 UUID
 uuid('example') // v5 UUID
 uuid('example', '6ba7b810-9dad-11d1-80b4-00c04fd430c8') // v5 UUID with namespace
 ```
 
 `name` must be a string. Use `json_serialize()` to convert a JSON object to a string.
+`namespace` must be a UUID string. By default, it uses the NIL UUID.
+
+The UUID RFC pre-defines four namespaces
+
+* NameSpace_DNS:  `6ba7b810-9dad-11d1-80b4-00c04fd430c8`
+* NameSpace_URL:  `6ba7b811-9dad-11d1-80b4-00c04fd430c8`
+* NameSpace_OID:  `6ba7b812-9dad-11d1-80b4-00c04fd430c8`
+* NameSpace_X500: `6ba7b814-9dad-11d1-80b4-00c04fd430c8`
 
 ### `regex_test`
 **Syntax**:

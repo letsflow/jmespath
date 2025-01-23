@@ -28,7 +28,7 @@ import type { TreeInterpreter } from './TreeInterpreter';
 import { sha256 } from '@noble/hashes/sha256';
 import { sha512 } from '@noble/hashes/sha512';
 import { bytesToHex } from '@noble/hashes/utils';
-import { NIL, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import { NIL, v5 as uuidv5 } from 'uuid';
 import jsonStringify from './utils/json-serialize';
 
 export enum InputArgument {
@@ -670,8 +670,8 @@ export class Runtime {
     return bytesToHex(sha512(inputValue));
   };
 
-  private functionUuid: RuntimeFunction<[string?, string?], string> = ([name, ns]) => {
-    return name !== undefined ? uuidv5(name, ns ?? NIL) : uuidv4();
+  private functionUuid: RuntimeFunction<[string, string?], string> = ([name, ns]) => {
+    return uuidv5(name, ns ?? NIL);
   };
 
   private parseRegexString(regexString: string): RegExp {
@@ -1192,7 +1192,6 @@ export class Runtime {
       _signature: [
         {
           types: [InputArgument.TYPE_STRING],
-          optional: true,
         },
         {
           types: [InputArgument.TYPE_STRING],

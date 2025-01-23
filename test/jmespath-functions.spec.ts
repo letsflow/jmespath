@@ -172,7 +172,6 @@ describe('Added functions', () => {
   });
 
   it('uuid', () => {
-    expect(search({}, 'uuid()')).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
     expect(search({}, "uuid('example')")).toEqual('feb54431-301b-52bb-a6dd-e1e93e81bb9e');
     expect(search({}, "uuid('example', '6ba7b810-9dad-11d1-80b4-00c04fd430c8')")).toEqual(
       '7cb48787-6d91-5b9f-bc60-f30298ea5736',

@@ -630,7 +630,7 @@ export class Runtime {
     thenValue,
     elseValue,
   ]) => {
-    return condition ? thenValue : elseValue ?? null;
+    return !!condition ? thenValue : elseValue ?? null;
   };
 
   private functionRange: RuntimeFunction<[number, number?, string?], Array<number | string>> = ([
@@ -1120,7 +1120,7 @@ export class Runtime {
       _func: this.functionIf,
       _signature: [
         {
-          types: [InputArgument.TYPE_BOOLEAN],
+          types: [InputArgument.TYPE_ANY],
         },
         {
           types: [InputArgument.TYPE_ANY],

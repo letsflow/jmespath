@@ -5,7 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://letsflow.io/jmespath",
+  "homepage": "https://docs.letsflow.io/libraries/jmespath",
   "contributors": [
     {
       "name": "Arnold Daniels",

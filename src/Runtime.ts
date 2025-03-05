@@ -657,10 +657,6 @@ export class Runtime {
     return Array.from({ length: end - start }, (_, i) => (prefix !== undefined ? `${prefix}${i + start}` : i + start));
   };
 
-  private functionToObject: RuntimeFunction<[JSONArrayKeyValuePairs], JSONObject> = ([array]) => {
-    return Object.fromEntries(array);
-  };
-
   private functionJsonSerialize: RuntimeFunction<[JSONValue], string> = ([inputValue]) => {
     const result = jsonStringify(inputValue);
     if (result === undefined) {
@@ -1174,14 +1170,6 @@ export class Runtime {
         {
           types: [InputArgument.TYPE_STRING],
           optional: true,
-        },
-      ],
-    },
-    to_object: {
-      _func: this.functionToObject,
-      _signature: [
-        {
-          types: [InputArgument.TYPE_ARRAY],
         },
       ],
     },

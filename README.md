@@ -241,24 +241,6 @@ range(1, 5)             // [1, 2, 3, 4]
 range(1, 5, 'item_')    // ["item_1", "item_2", "item_3", "item_4"]
 ```
 
-### `to_object`
-**Syntax**:
-```jmespath
-to_object(entries)
-```
-
-**Description**:  
-Converts an array of key-value pairs into an object.
-
-**Example**:
-```jmespath
-to_object([['key1', 'value1'], ['key2', 'value2']])
-// { "key1": "value1", "key2": "value2" }
-
-[ 'value1', 'value2'] | to_object(zip(range(1, length(@) + 1, 'key'), @))
-// { "key1": "value1", "key2": "value2" }
-```
-
 ### `json_serialize`
 **Syntax**:
 ```jmespath

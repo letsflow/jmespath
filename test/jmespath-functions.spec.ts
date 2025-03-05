@@ -150,17 +150,6 @@ describe('Added functions', () => {
     expect(search({}, "range(1, 5, 'item_')")).toEqual(['item_1', 'item_2', 'item_3', 'item_4']);
   });
 
-  it('to_object()', () => {
-    expect(search({}, "to_object([['key1', 'value1'], ['key2', 'value2']])")).toEqual({
-      key1: 'value1',
-      key2: 'value2',
-    });
-    expect(search(['value1', 'value2'], "to_object(zip(range(1, length(@) + 1, 'key'), @))")).toEqual({
-      key1: 'value1',
-      key2: 'value2',
-    });
-  });
-
   it('json_serialize()', () => {
     expect(search({ foo: 'bar' }, 'json_serialize(@)')).toEqual('{"foo":"bar"}');
   });

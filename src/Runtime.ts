@@ -710,6 +710,10 @@ export class Runtime {
     return val.replace(this.parseRegexString(regexp), repl);
   };
 
+  private functionRegexCount: RuntimeFunction<[string, string], number> = ([regexp, val]) => {
+    return Array.from(val.matchAll(this.parseRegexString(regexp))).length;
+  };
+
   private functionTable: FunctionTable = {
     abs: {
       _func: this.functionAbs,
@@ -1264,6 +1268,17 @@ export class Runtime {
         {
           types: [InputArgument.TYPE_STRING],
         },
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+        {
+          types: [InputArgument.TYPE_STRING],
+        },
+      ],
+    },
+    regex_count: {
+      _func: this.functionRegexCount,
+      _signature: [
         {
           types: [InputArgument.TYPE_STRING],
         },

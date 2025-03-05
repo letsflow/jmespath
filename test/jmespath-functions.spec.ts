@@ -210,6 +210,10 @@ describe('Added functions', () => {
     expect(search('hello world', "regex_replace('/w\\w+d/', 'planet', @)")).toEqual('hello planet');
     expect(search('hello world', "regex_replace('/[aeoiu]/g', '*', @)")).toEqual('h*ll* w*rld');
   });
+
+  it('regex_count', () => {
+    expect(search('hello world', "regex_count('/\\w+/g', @)")).toEqual(2);
+  });
 });
 
 describe('custom functions', () => {

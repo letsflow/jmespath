@@ -412,6 +412,21 @@ regex_replace('/world/', 'universe', 'hello world')
 // "hello universe"
 ```
 
+### `regex_count`
+**Syntax**:
+```jmespath
+regex_count(regex, string)
+```
+
+**Description**:
+Counts the number of matches of a regular expression in a string.
+
+**Example**:
+```jmespath
+regex_count('/\\w+/g', 'hello world')
+// 2
+```
+
 ## More Resources
 
 The example above only shows a small amount of what

@@ -138,6 +138,12 @@ describe('Added functions', () => {
     expect(search({ cond: false }, "if(@.cond, 'ok')")).toEqual(null);
   });
 
+  it('get()', () => {
+    expect(search({ foo: 'bar' }, "get(@, 'foo')")).toEqual('bar');
+    expect(search({ foo: 'bar' }, "get(@, 'missing')")).toEqual(null);
+    expect(search({ foo: 'bar' }, "get(@, 'missing', 'default')")).toEqual('default');
+  });
+
   it('range()', () => {
     expect(search({}, 'range(5)')).toEqual([0, 1, 2, 3, 4]);
     expect(search({}, 'range(1, 5)')).toEqual([1, 2, 3, 4]);

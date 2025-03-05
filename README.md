@@ -207,6 +207,22 @@ Returns `thenValue` if `condition` is true, otherwise returns `elseValue`. If `e
 if(@ > 10, "large", "small")
 ```
 
+### `get`
+**Syntax**:
+```jmespath
+get(object, key, defaultValue?)
+```
+
+**Description**:
+Returns the value of a key in an object.
+
+**Example**:
+```jmespath
+get({ key: 'value' }, 'key')                 // "value"
+get({ key: 'value' }, 'missing')             // null
+get({ key: 'value' }, 'missing', 'default')  // "default"
+```
+
 ### `range`
 **Syntax**:
 ```jmespath

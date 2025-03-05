@@ -633,6 +633,17 @@ export class Runtime {
     return !!condition ? thenValue : elseValue ?? null;
   };
 
+  private functionGet: RuntimeFunction<[JSONValue, string, JSONValue?], JSONValue> = ([
+    inputValue,
+    key,
+    defaultValue,
+  ]) => {
+    if (this.getTypeName(inputValue) !== InputArgument.TYPE_OBJECT) {
+      return defaultValue ?? null;
+    }
+    return (inputValue as JSONObject)[key] ?? defaultValue ?? null;
+  };
+
   private functionRange: RuntimeFunction<[number, number?, string?], Array<number | string>> = ([
     start,
     end,
@@ -1124,6 +1135,21 @@ export class Runtime {
         },
         {
           types: [InputArgument.TYPE_ANY],
+        },
+        {
+          types: [InputArgument.TYPE_ANY],
+          optional: true,
+        },
+      ],
+    },
+    get: {
+      _func: this.functionGet,
+      _signature: [
+        {
+          types: [InputArgument.TYPE_OBJECT],
+        },
+        {
+          types: [InputArgument.TYPE_STRING],
         },
         {
           types: [InputArgument.TYPE_ANY],

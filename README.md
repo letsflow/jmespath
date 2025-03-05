@@ -17,6 +17,7 @@ This fork extends the original specs, adding the following functionality;
 Additionally, it adds the following functions:
 
 * [if](#if) - Conditional expression
+* [get](#get) - Get a value from an object
 * [range](#range) - Generate a range of numbers or prefixed strings
 * [to_object](#to_object) - Convert an array of key-value pairs into an object
 * [json_serialize](#json_serialize) - Serialize a JSON value to a string
@@ -28,6 +29,7 @@ Additionally, it adds the following functions:
 * [regex_match](#regex_match) - Return the first match of a regular expression in a string
 * [regex_match_all](#regex_match_all) - Return all matches of a regular expression in a string
 * [regex_replace](#regex_replace) - Replace parts of a string matching a regular expression with a replacement string
+* [regex_count](#regex_count) - Count the number of matches of a regular expression in a string
 
 ## INSTALLATION
 

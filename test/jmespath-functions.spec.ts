@@ -191,7 +191,7 @@ describe('Added functions', () => {
       ['bar=99', 'bar', '99'],
     ]);
     expect(
-      search('foo=24 bar=99', "regex_match_all('/(\\w+)=(\\d+)/g', @) | map(&[[1],[2]], @) | to_object(@)"),
+      search('foo=24 bar=99', "regex_match_all('/(\\w+)=(\\d+)/g', @) | map(&[[1],[2]], @) | from_items(@)"),
     ).toEqual({ foo: '24', bar: '99' });
   });
 
